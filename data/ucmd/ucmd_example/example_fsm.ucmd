@@ -1,0 +1,143 @@
+//Описание управляющих сигналов автомата
+@CONTROL
+	control<0:4>;
+	mpu_ready;
+	//Состояние сигналов по умолчанию: 1'b0
+
+//Описание осведомительных сигналов автомата
+@FEEDBACK
+	feedback<4:0>;
+
+//Сигналы кода команды
+@CMD
+	cmd<4:0>;
+
+//Сигнал разрешения запуска микропрограммы
+@RUN
+	start;
+
+
+//Начальное состояние
+IDLE0:
+	control<4:0>=5h"00";
+	mpu_ready=1;
+
+//Описание микропрограмм
+//0x00 Микропрограмма 0
+@IF (cmd<4:0>=5h"00") => EX_0;
+//0x01 Микропрограмма 1
+@IF (cmd<4:0>=5h"01") => EX_1;
+//0x02 Микропрограмма 2
+@IF (cmd<4:0>=5h"02") => EX_2;
+//0x1F Микропрограмма 31
+@IF (cmd<4:0>=5h"1f") => EX_1F;
+
+//Переход по умолчанию
+@DEFAULT => IDLE0;
+
+/////////////////////////////
+//	   Микропрограмма 0    //
+/////////////////////////////
+
+EX_0: //
+
+	control<4:0>=5h"01";
+	@DEFAULT => EX_0_STATE1;
+
+EX_0_STATE1:  //
+
+	@IF (feedback<0>=1) => IDLE0;
+	@DEFAULT => EX_0_STATE1;
+
+/////////////////////////////
+//	   Микропрограмма 1    //
+/////////////////////////////
+
+EX_1: //
+
+	control<4:0>=5h"02";
+	@DEFAULT => EX_1_STATE1;
+
+EX_1_STATE1:  //Множественные переходы
+
+	@IF (feedback<2:1>="00" & feedback<0>=1) => EX_1_FB1;
+	@IF (feedback<2>=0 & feedback<1>=1 & feedback<0>=0) => EX_1_FB2;
+	@IF (feedback<2>=0 & feedback<1:0>="11") => EX_1_FB3;
+	@IF (feedback<2>=1 & feedback<1:0>="00") => EX_1_FB4;
+	@DEFAULT => EX_1_STATE1;
+
+EX_1_FB1: //
+
+	control<4:0>="00010";
+	@DEFAULT => IDLE0;
+
+EX_1_FB2: //
+
+	control<4:0>="00100";
+	@DEFAULT => IDLE0;
+
+EX_1_FB3: //
+
+	control<4:0>="01000";
+	@DEFAULT => IDLE0;
+
+EX_1_FB4: //
+
+	control<4:0>="10000";
+	@DEFAULT => IDLE0;
+
+
+
+/////////////////////////////
+//	   Микропрограмма 2    //
+/////////////////////////////
+
+EX_2: //
+
+	control<4:0>="10011";
+	@DEFAULT => EX_2_STATE1;
+
+EX_2_STATE1:  //Множественные переходы
+
+	@IF (feedback<2:0>="001") => EX_2_FB1;
+	@IF (feedback<2:0>="010") => EX_2_FB2;
+	@IF (feedback<2:0>="011") => EX_2_FB3;
+	@IF (feedback<2:0>="100") => EX_2_FB4;
+	@DEFAULT => EX_2_STATE1;
+
+EX_2_FB1: //
+
+	control<4:2>="111";
+	control<1:0>="01";
+	@DEFAULT => IDLE0;
+
+EX_2_FB2: //
+
+	control<4:0>="11011";
+	@DEFAULT => IDLE0;
+
+EX_2_FB3: //
+
+	control<4:0>="10111";
+	@DEFAULT => IDLE0;
+
+EX_2_FB4: //
+
+	control<4:0>="01111";
+	@DEFAULT => IDLE0;
+
+
+/////////////////////////////
+//	   Микропрограмма 1F   //
+/////////////////////////////
+
+EX_1F: //
+
+	control<4:0>="11111";
+	@DEFAULT => EX_1F_STATE1;
+
+EX_1F_STATE1:  //
+
+	@IF (feedback<4:3>=2h"01") => IDLE0;
+	@IF (feedback<4>=1) => EX_1F;
+	@DEFAULT => EX_1F_STATE1;
