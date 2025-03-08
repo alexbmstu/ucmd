@@ -676,7 +676,7 @@ hello: 			@IF(getchar<7:0>=s"0" & wready=1) => H;	  @DEFAULT => echo;
 
 Диаграмма состояний микропрограммного автомата показана на рисунке 4.
 
-<img src="data/ucmd/ucmd_dest/uart_hello_world.svg" alt="Диаграмма переходов состояний микропрограммного автомата Hello world!" style="width:600px;"/>
+<img src="data/ucmd/ucmd_dest/uart_hello_world.svg" alt="Диаграмма переходов состояний микропрограммного автомата Hello world!" style="width:400px;"/>
 
 {:.image-caption}
 **Рисунок 4 — Диаграмма переходов состояний микропрограммного автомата Hello world!**
