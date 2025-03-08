@@ -1,0 +1,87 @@
+//Описание управляющих сигналов автомата
+//Регулярное выражение: \w+\d* (один или более символов (\w+), за которыми следует ноль или более цифр \d (\d*). Конец строки - пробельный символ
+
+@CONTROL
+	wvalid; 
+	rready; 
+	putchar7; putchar6; putchar5; putchar4; putchar3; putchar2; putchar1; putchar0; 
+	//Состояние сигналов по умолчанию: 1'b0
+
+//Описание осведомительных сигналов автомата
+@FEEDBACK
+	wready; 
+	rvalid; 
+  	small_letter;  // Строчная буква (a-z)
+  	capital_letter;  // Заглавная буква (A-Z)
+  	number;  // Цифра (0-9)
+  	hex_digit;  // Шестнадцатеричная цифра (0-9, A-F, a-f)
+  	punctuation_basic;  // Основные знаки препинания (., ,, :, ; , !, ?, ', ")
+  	punctuation_finance;  // Финансовые символы (#, $, %,  & , @)
+  	parentheses;  // Скобки ((, ), [, ])
+  	curly_braces;  // Фигурные скобки ({, }) - добавлено
+  	math_symbol;  // Математические символы (+, -, *, /, \, =, <, >)
+  	whitespace;  // Пробельные символы (пробел, табуляция, перевод строки, возврат каретки)
+  	vowel;  //Гласные буквы [aeiouAEIOU]
+  	start_stop;  //Начало и конец строки (\0)
+  	other;  // Другие символы
+
+//Сигналы кода команды
+@CMD
+	cmd0; 
+
+//Сигнал разрешения запуска микропрограммы
+@RUN
+	start; 
+
+//Начальное состояние
+IDLE0:
+//Описание микропрограмм
+//0x00 Микропрограмма 0 //Hello World
+@IF (cmd0=0) => q0; 
+//Переход по умолчанию
+@DEFAULT => IDLE0; 
+
+/////////////////////////////
+//	   Микропрограмма 0    //
+/////////////////////////////
+
+
+q0: 
+	rready=1; 
+	@IF(rvalid=0) => q0; 	
+	@IF(small_letter=1 & rvalid=1) => q1; 	
+	@IF(capital_letter=1 & rvalid=1) => q1; 	
+	@DEFAULT => q3; 
+
+q1: 
+	rready=1; 
+	@IF(rvalid=0) => q1; 	
+	@IF(small_letter=0 & capital_letter=1 & number=0 & whitespace=0 & rvalid=1) => q1; 	
+	@IF(small_letter=1 & capital_letter=0 & number=0 & whitespace=0 & rvalid=1) => q1; 	
+	@IF(small_letter=0 & capital_letter=0 & number=1 & whitespace=0 & rvalid=1) => q2; 	
+	@IF(small_letter=0 & capital_letter=0 & number=0 & whitespace=1 & rvalid=1) => q4; 
+	@DEFAULT => q3; 
+
+q2: 
+	rready=1; 
+	@IF(rvalid=0) => q2; 	
+	@IF(number=1 & whitespace=0 & rvalid=1) => q2; 	
+	@IF(whitespace=1 & rvalid=1) => q4; 
+	@DEFAULT => q3; 
+
+q3: 
+	@IF(wready=1) => q3_tx; 
+	@DEFAULT => q3; 
+
+q3_tx:
+	wvalid=1;  putchar7=0; putchar6=0; putchar5=1; putchar4=0; putchar3=1; putchar2=1; putchar1=0; putchar0=1; 
+	@DEFAULT => IDLE0; 
+
+q4: 
+	@IF(wready=1) => q4_tx; 
+	@DEFAULT => q4; 
+
+q4_tx:
+	wvalid=1;  putchar7=0; putchar6=0; putchar5=1; putchar4=0; putchar3=1; putchar2=0; putchar1=1; putchar0=1; 
+	@DEFAULT => IDLE0; 
+
