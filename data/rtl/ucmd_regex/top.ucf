@@ -1,0 +1,15 @@
+##
+## 5   on X5 / 66MHz
+NET "clk" LOC = U23;
+NET "clk" TNM_NET = "userclk";
+# 66 Mhz
+TIMESPEC ts0 = PERIOD "userclk" 15.0015 ns HIGH 50 %;
+## 2   on SW10 pushbutton (active-high)
+NET "rst" LOC = H10;
+NET "rst" TIG;
+## 2   on LED DS20 north
+#NET "locked" LOC = AH27;
+
+NET "rx"                      LOC = "J24";    ## 24  on U34
+NET "tx"                      LOC = "J25";    ## 25  on U34
+
