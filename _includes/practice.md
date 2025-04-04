@@ -186,7 +186,7 @@ assign rready = (echo)? wready: rready_ucmd;
 
 
 // Instantiate the module
-top_ucmd_fsm_example #(.fpga_type("virtex")) hello_world (
+top_ucmd_fsm_hello #(.fpga_type("virtex")) hello_world (
     .rst(rst), 
     .clk(clk), 
     .debug(), 
@@ -743,7 +743,7 @@ mkdir part1
 * Выполните генерацию микропрограммного автомата из директории `~/lab2`, выполнив команду:
 
 ```bash
-git clone https://gitlab.bmstu.ru/iu6-hardware-section/verilog-labs/ucmd.git
+git clone https://latex.bmstu.ru/gitlab/labs/ucmd.git
 cd ~/lab2/ucmd/data/ucmd/utils
 make uart
 ```
@@ -787,7 +787,7 @@ cd part1
 # Модуль верхнего уровня:
 set top_name uart_top
 # входные исходные файлы:
-set hdl_files [ list fifo.v uart.v uart_hello_world.v uart_rx.v uart_top.v uart_tx.v uart.top.ucf]
+set hdl_files [ list fifo.v uart.v uart_hello_world.v uart_rx.v uart_top.v uart_tx.v uart_top.ucf]
 # Настройки проекта
 project new $top_name.ise
 project set family Virtex6
@@ -981,7 +981,7 @@ ascii_type_detector ascii_type_detector_inst (
     );
 
 // Instantiate the ucmd module
-top_ucmd_fsm_example #(.fpga_type("virtex")) ucmd_inst (
+top_ucmd_fsm_regex #(.fpga_type("virtex")) ucmd_inst (
     .rst(rst), 
     .clk(clk), 
     .debug(), 

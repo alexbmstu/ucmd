@@ -76,7 +76,7 @@ ascii_type_detector ascii_type_detector_inst (
     );
 
 // Instantiate the ucmd module
-top_ucmd_fsm_example #(.fpga_type("virtex")) ucmd_inst (
+top_ucmd_fsm_regex #(.fpga_type("virtex")) ucmd_inst (
     .rst(rst), 
     .clk(clk), 
     .debug(), 

@@ -1,5 +1,4 @@
-//  
-
+// Модуль верхнего уровня проекта uart_top.v
 module uart_top
 #(parameter frequency=66000000, parameter baudrate=115200, parameter data_width=8) (
   input  clk,
@@ -43,7 +42,7 @@ assign rready = (echo)? wready: rready_ucmd;
 
 
 // Instantiate the module
-top_ucmd_fsm_example #(.fpga_type("virtex")) hello_world (
+top_ucmd_fsm_hello #(.fpga_type("virtex")) hello_world (
     .rst(rst), 
     .clk(clk), 
     .debug(), 
@@ -79,3 +78,4 @@ top_ucmd_fsm_example #(.fpga_type("virtex")) hello_world (
     );
 
 endmodule
+
