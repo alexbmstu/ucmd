@@ -304,13 +304,13 @@ img
 ```js
 IDLE0:
     mpu_ready = 1;     // Сигнал готовности в начальном состоянии установлен в 1
-    cmd<3:0> = 4h"0";  // Микропрограмма 0
-    cmd<3:0> = 4h"1";  // Микропрограмма 1
-    cmd<3:0> = 4h"2";  // Микропрограмма 2
-    cmd<3:0> = 4h"3";  // Микропрограмма 3
-    cmd<3:0> = 4h"4";  // Микропрограмма 4
-    cmd<3:0> = 4h"5";  // Микропрограмма 5
-    cmd<3:0> = 4h"d";  // Микропрограмма d
+    @IF (cmd<3:0> = 4h"0") => prog0;  // Микропрограмма 0
+    @IF (cmd<3:0> = 4h"1") => prog1;  // Микропрограмма 1
+    @IF (cmd<3:0> = 4h"2") => prog2;  // Микропрограмма 2
+    @IF (cmd<3:0> = 4h"3") => prog3;  // Микропрограмма 3
+    @IF (cmd<3:0> = 4h"4") => prog4;  // Микропрограмма 4
+    @IF (cmd<3:0> = 4h"5") => prog5;  // Микропрограмма 5
+    @IF (cmd<3:0> = 4h"d") => prog13;  // Микропрограмма d
 ```
 
 #### 1.2.3. Описание микропрограмм
@@ -378,9 +378,9 @@ EX_1_STATE1:
 
 ```js
 EX_1F_STATE1: 
-	@IF (feedback<3:2>="01") => IDLE0;
-	@IF (feedback<4>=1) => EX_1F;
-	@DEFAULT => EX_1F_STATE1;
+  @IF (feedback<3:2>="01") => IDLE0;
+  @IF (feedback<4>=1) => EX_1F;
+  @DEFAULT => EX_1F_STATE1;
 ```
 Потенциальной ошибкой является пересечение условий термов, если они ведут в различные состояния. В итоге, транслятор `ucmd` выдаст следующее предупреждение: 
 
@@ -392,9 +392,9 @@ EX_1F_STATE1:
 
 ```js
 EX_1F_STATE1: 
-	@IF (feedback<3:2>="01") => EX_1F;
-	@IF (feedback<4>=1) => EX_1F;
-	@DEFAULT => EX_1F_STATE1;
+  @IF (feedback<3:2>="01") => EX_1F;
+  @IF (feedback<4>=1) => EX_1F;
+  @DEFAULT => EX_1F_STATE1;
 ```
 
 #### 1.2.4. Переход по умолчанию
@@ -450,27 +450,27 @@ EX_1F_STATE1:
 ```js
 //Описание управляющих сигналов автомата
 @CONTROL
-	control<0:4>;
-	mpu_ready;
-	//Состояние сигналов по умолчанию: 1'b0
+  control<0:4>;
+  mpu_ready;
+  //Состояние сигналов по умолчанию: 1'b0
 
 //Описание осведомительных сигналов автомата
 @FEEDBACK
-	feedback<4:0>;
+  feedback<4:0>;
 
 //Сигналы кода команды
 @CMD
-	cmd<4:0>;
+  cmd<4:0>;
 
 //Сигнал разрешения запуска микропрограммы
 @RUN
-	start;
+  start;
 
 
 //Начальное состояние
 IDLE0:
-	control<4:0>=5h"00";
-	mpu_ready=1;
+  control<4:0>=5h"00";
+  mpu_ready=1;
 
 //Описание микропрограмм
 //0x00 Микропрограмма 0
@@ -491,13 +491,13 @@ IDLE0:
 
 EX_0: //
 
-	control<4:0>=5h"01";
-	@DEFAULT => EX_0_STATE1;
+  control<4:0>=5h"01";
+  @DEFAULT => EX_0_STATE1;
 
 EX_0_STATE1:  //
 
-	@IF (feedback<0>=1) => IDLE0;
-	@DEFAULT => EX_0_STATE1;
+  @IF (feedback<0>=1) => IDLE0;
+  @DEFAULT => EX_0_STATE1;
 
 /////////////////////////////
 //	   Микропрограмма 1    //
@@ -505,36 +505,36 @@ EX_0_STATE1:  //
 
 EX_1: //
 
-	control<4:0>=5h"02";
-	@DEFAULT => EX_1_STATE1;
+  control<4:0>=5h"02";
+  @DEFAULT => EX_1_STATE1;
 
 EX_1_STATE1:  //Множественные переходы
 
-	@IF (feedback<2:1>="00" & feedback<0>=1) => EX_1_FB1;
-	@IF (feedback<2>=0 & feedback<1>=1 & feedback<0>=0) => EX_1_FB2;
-	@IF (feedback<2>=0 & feedback<1:0>="11") => EX_1_FB3;
-	@IF (feedback<2>=1 & feedback<1:0>="00") => EX_1_FB4;
-	@DEFAULT => EX_1_STATE1;
+  @IF (feedback<2:1>="00" & feedback<0>=1) => EX_1_FB1;
+  @IF (feedback<2>=0 & feedback<1>=1 & feedback<0>=0) => EX_1_FB2;
+  @IF (feedback<2>=0 & feedback<1:0>="11") => EX_1_FB3;
+  @IF (feedback<2>=1 & feedback<1:0>="00") => EX_1_FB4;
+  @DEFAULT => EX_1_STATE1;
 
 EX_1_FB1: //
 
-	control<4:0>="00010";
-	@DEFAULT => IDLE0;
+  control<4:0>="00010";
+  @DEFAULT => IDLE0;
 
 EX_1_FB2: //
 
-	control<4:0>="00100";
-	@DEFAULT => IDLE0;
+  control<4:0>="00100";
+  @DEFAULT => IDLE0;
 
 EX_1_FB3: //
 
-	control<4:0>="01000";
-	@DEFAULT => IDLE0;
+  control<4:0>="01000";
+  @DEFAULT => IDLE0;
 
 EX_1_FB4: //
 
-	control<4:0>="10000";
-	@DEFAULT => IDLE0;
+  control<4:0>="10000";
+  @DEFAULT => IDLE0;
 
 /////////////////////////////
 //	   Микропрограмма 2    //
@@ -542,37 +542,37 @@ EX_1_FB4: //
 
 EX_2: //
 
-	control<4:0>="10011";
-	@DEFAULT => EX_2_STATE1;
+  control<4:0>="10011";
+  @DEFAULT => EX_2_STATE1;
 
 EX_2_STATE1:  //Множественные переходы
 
-	@IF (feedback<2:0>="001") => EX_2_FB1;
-	@IF (feedback<2:0>="010") => EX_2_FB2;
-	@IF (feedback<2:0>="011") => EX_2_FB3;
-	@IF (feedback<2:0>="100") => EX_2_FB4;
-	@DEFAULT => EX_2_STATE1;
+  @IF (feedback<2:0>="001") => EX_2_FB1;
+  @IF (feedback<2:0>="010") => EX_2_FB2;
+  @IF (feedback<2:0>="011") => EX_2_FB3;
+  @IF (feedback<2:0>="100") => EX_2_FB4;
+  @DEFAULT => EX_2_STATE1;
 
 EX_2_FB1: //
 
-	control<4:2>="111";
-	control<1:0>="01";
-	@DEFAULT => IDLE0;
+  control<4:2>="111";
+  control<1:0>="01";
+  @DEFAULT => IDLE0;
 
 EX_2_FB2: //
 
-	control<4:0>="11011";
-	@DEFAULT => IDLE0;
+  control<4:0>="11011";
+  @DEFAULT => IDLE0;
 
 EX_2_FB3: //
 
-	control<4:0>="10111";
-	@DEFAULT => IDLE0;
+  control<4:0>="10111";
+  @DEFAULT => IDLE0;
 
 EX_2_FB4: //
 
-	control<4:0>="01111";
-	@DEFAULT => IDLE0;
+  control<4:0>="01111";
+  @DEFAULT => IDLE0;
 
 
 /////////////////////////////
@@ -581,14 +581,14 @@ EX_2_FB4: //
 
 EX_1F: //
 
-	control<4:0>="11111";
-	@DEFAULT => EX_1F_STATE1;
+  control<4:0>="11111";
+  @DEFAULT => EX_1F_STATE1;
 
 EX_1F_STATE1:  //
 
-	@IF (feedback<4:3>=2h"01") => IDLE0;
-	@IF (feedback<4>=1) => EX_1F;
-	@DEFAULT => EX_1F_STATE1;
+  @IF (feedback<4:3>=2h"01") => IDLE0;
+  @IF (feedback<4>=1) => EX_1F;
+  @DEFAULT => EX_1F_STATE1;
 ```
 
 Диаграмма переходов состояний для приведенного автомата показана ниже: 
