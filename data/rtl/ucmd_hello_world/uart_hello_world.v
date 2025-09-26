@@ -67,28 +67,28 @@
 //
 //    UC(10) - wvalid
 //    UC(9) - rready
-//    UC(8) - putchar7
-//    UC(7) - putchar6
-//    UC(6) - putchar5
-//    UC(5) - putchar4
-//    UC(4) - putchar3
-//    UC(3) - putchar2
-//    UC(2) - putchar1
-//    UC(1) - putchar0
+//    UC(8) - putchar[7]
+//    UC(7) - putchar[6]
+//    UC(6) - putchar[5]
+//    UC(5) - putchar[4]
+//    UC(4) - putchar[3]
+//    UC(3) - putchar[2]
+//    UC(2) - putchar[1]
+//    UC(1) - putchar[0]
 //    UC(0) - echo
         
 //
 //   Feedback signals description:
 //
 //    FBS(8) - wready
-//    FBS(7) - getchar7
-//    FBS(6) - getchar6
-//    FBS(5) - getchar5
-//    FBS(4) - getchar4
-//    FBS(3) - getchar3
-//    FBS(2) - getchar2
-//    FBS(1) - getchar1
-//    FBS(0) - getchar0
+//    FBS(7) - getchar[7]
+//    FBS(6) - getchar[6]
+//    FBS(5) - getchar[5]
+//    FBS(4) - getchar[4]
+//    FBS(3) - getchar[3]
+//    FBS(2) - getchar[2]
+//    FBS(1) - getchar[1]
+//    FBS(0) - getchar[0]
 
 //
 //   Command signals description:
@@ -150,7 +150,7 @@ module ucmd_fsm #(
     parameter ucmd_c             = 11, 
     parameter cmd_c              = 1,
     parameter ucmdRAM_data_w     = 32,
-    parameter ucmdRAM_adr_w      = 6,
+    parameter ucmdRAM_adr_w      = 5,
     parameter ucmdARAM_data_w    = 5,
     parameter ucmdARAM_adr_w     = 1,
     parameter mcmem_file         = "",
@@ -210,7 +210,7 @@ module ucmd_fsm #(
         .rd_port(ucmd_ram_type),
         .fpga_type(fpga_type)
       )
-      inst_ucmd_ram_example (
+      inst_ucmd_ram_uart_hello_world (
         .clk(clk),
         .wr_addr(ucmdRAM_adr),
         .wr_data(ucmdRAM_data),
@@ -229,7 +229,7 @@ module ucmd_fsm #(
         .rd_port("async"),
         .fpga_type(fpga_type)
       )
-      inst_ucmd_adrram_example (
+      inst_ucmd_adrram_uart_hello_world (
         .clk(clk),
         .wr_addr(ucmdARAM_adr),
         .wr_data(ucmdARAM_data),
@@ -247,7 +247,7 @@ module ucmd_fsm #(
     generate 
         if (control_type=="carry4") begin
             //Оределение бит адрес следующей микрокоманды с использованием CARRY4 цепочек:
-            ucmd_carry4 #(.ucmd_g(ucmd_g), .ucmd_adr(ucmd_adr), .ucmd_fbs(ucmd_fbs)) ucmd_carry4_example_inst (
+            ucmd_carry4 #(.ucmd_g(ucmd_g), .ucmd_adr(ucmd_adr), .ucmd_fbs(ucmd_fbs)) ucmd_carry4_uart_hello_world_inst (
                 .ucmd(micro_command[ucmd_g*term_width+ucmd_adr-1:0]), .fb(fbs), .result_address(micro_command_address_next)
             );
 
@@ -551,7 +551,7 @@ module bitwise_logic_x8_with_carry4 #(parameter data_w = 32) (
     end
   endgenerate
   // Каскадное подключение блоков CARRY4
-  carry4_chain #(extended_data_w/2) u_carry4_chain_example (.data_in(f_ext), .carry_in(en), .result(result));
+  carry4_chain #(extended_data_w/2) u_carry4_chain_uart_hello_world (.data_in(f_ext), .carry_in(en), .result(result));
 
 endmodule
 
@@ -634,7 +634,7 @@ module ucmd_carry4 #(parameter ucmd_g = 2, parameter ucmd_adr = 32, parameter uc
 
   generate
     for (n = 0; n <= ucmd_adr; n = n+1) begin: carry4_chain_gen
-		carry4_chain #(extended_ucmd_term_en3_width) u_carry4_chain_example ( // Используем carry4_chain
+		carry4_chain #(extended_ucmd_term_en3_width) u_carry4_chain_uart_hello_world ( // Используем carry4_chain
         .data_in(adr_enabled3[n]),
 		.carry_in(1'b1),
         .result(result_address_temp[n])
@@ -650,14 +650,14 @@ endmodule
 `endif
 
 //Модуль верхнего уровня
-module top_ucmd_fsm_example #(    
+module top_ucmd_fsm_uart_hello_world #(    
     parameter ucmd_g                = 1, 
     parameter ucmd_fbs              = 9,    
     parameter ucmd_adr              = 5,
     parameter ucmd_c                = 11,    
     parameter cmd_c                 = 1,
     parameter ucmdRAM_data_w        = 32,
-    parameter ucmdRAM_adr_w         = 6,
+    parameter ucmdRAM_adr_w         = 5,
     parameter ucmdARAM_data_w       = 5,
     parameter ucmdARAM_adr_w        = 1,
     parameter ucmd_ram_type         = "sync",  //sync, async
@@ -677,26 +677,12 @@ module top_ucmd_fsm_example #(
 
 	//FEEDBACK SIGNALS
 	input wire wready,
-	input wire getchar7,
-	input wire getchar6,
-	input wire getchar5,
-	input wire getchar4,
-	input wire getchar3,
-	input wire getchar2,
-	input wire getchar1,
-	input wire getchar0,
+	input wire [7:0] getchar,
 
 	//MICROCOMMAND SIGNALS
 	output wire wvalid,
 	output wire rready,
-	output wire putchar7,
-	output wire putchar6,
-	output wire putchar5,
-	output wire putchar4,
-	output wire putchar3,
-	output wire putchar2,
-	output wire putchar1,
-	output wire putchar0,
+	output wire [7:0] putchar,
 	output wire echo,
 
 
@@ -727,25 +713,11 @@ module top_ucmd_fsm_example #(
 	assign run = rvalid;
 	assign fbs = {
 		wready,
-		getchar7,
-		getchar6,
-		getchar5,
-		getchar4,
-		getchar3,
-		getchar2,
-		getchar1,
-		getchar0};
+		getchar[7:0]};
     `endif
 	assign wvalid = ucmd[10];
 	assign rready = ucmd[9];
-	assign putchar7 = ucmd[8];
-	assign putchar6 = ucmd[7];
-	assign putchar5 = ucmd[6];
-	assign putchar4 = ucmd[5];
-	assign putchar3 = ucmd[4];
-	assign putchar2 = ucmd[3];
-	assign putchar1 = ucmd[2];
-	assign putchar0 = ucmd[1];
+	assign putchar[7:0] = ucmd[8:1];
 	assign echo = ucmd[0];
 
 
@@ -767,7 +739,7 @@ module top_ucmd_fsm_example #(
         .control_type(control_type),
         .fpga_type(fpga_type)
     ) 
-    Inst_ucmd_fsm_example (
+    Inst_ucmd_fsm_uart_hello_world (
         .rst(rst),
         .clk(clk),        
         .cmd(cmd),
@@ -841,26 +813,26 @@ SignalExport.triggerChannel<0000><0251>=ucmd_state[1]
 SignalExport.triggerChannel<0000><0250>=ucmd_state[0]
 SignalExport.triggerChannel<0000><0249>=wvalid
 SignalExport.triggerChannel<0000><0248>=rready
-SignalExport.triggerChannel<0000><0247>=putchar7
-SignalExport.triggerChannel<0000><0246>=putchar6
-SignalExport.triggerChannel<0000><0245>=putchar5
-SignalExport.triggerChannel<0000><0244>=putchar4
-SignalExport.triggerChannel<0000><0243>=putchar3
-SignalExport.triggerChannel<0000><0242>=putchar2
-SignalExport.triggerChannel<0000><0241>=putchar1
-SignalExport.triggerChannel<0000><0240>=putchar0
+SignalExport.triggerChannel<0000><0247>=putchar[7]
+SignalExport.triggerChannel<0000><0246>=putchar[6]
+SignalExport.triggerChannel<0000><0245>=putchar[5]
+SignalExport.triggerChannel<0000><0244>=putchar[4]
+SignalExport.triggerChannel<0000><0243>=putchar[3]
+SignalExport.triggerChannel<0000><0242>=putchar[2]
+SignalExport.triggerChannel<0000><0241>=putchar[1]
+SignalExport.triggerChannel<0000><0240>=putchar[0]
 SignalExport.triggerChannel<0000><0239>=echo
 SignalExport.triggerChannel<0000><0238>=cmd0
 SignalExport.triggerChannel<0000><0237>=rvalid
 SignalExport.triggerChannel<0000><0236>=wready
-SignalExport.triggerChannel<0000><0235>=getchar7
-SignalExport.triggerChannel<0000><0234>=getchar6
-SignalExport.triggerChannel<0000><0233>=getchar5
-SignalExport.triggerChannel<0000><0232>=getchar4
-SignalExport.triggerChannel<0000><0231>=getchar3
-SignalExport.triggerChannel<0000><0230>=getchar2
-SignalExport.triggerChannel<0000><0229>=getchar1
-SignalExport.triggerChannel<0000><0228>=getchar0
+SignalExport.triggerChannel<0000><0235>=getchar[7]
+SignalExport.triggerChannel<0000><0234>=getchar[6]
+SignalExport.triggerChannel<0000><0233>=getchar[5]
+SignalExport.triggerChannel<0000><0232>=getchar[4]
+SignalExport.triggerChannel<0000><0231>=getchar[3]
+SignalExport.triggerChannel<0000><0230>=getchar[2]
+SignalExport.triggerChannel<0000><0229>=getchar[1]
+SignalExport.triggerChannel<0000><0228>=getchar[0]
 SignalExport.triggerChannel<0000><0227>=TRIG00227
 SignalExport.triggerChannel<0000><0226>=TRIG00226
 SignalExport.triggerChannel<0000><0225>=TRIG00225
@@ -1105,14 +1077,14 @@ SignalExport.asyncOutputWidth=0
 SignalExport.clockChannel=CLK
 SignalExport.syncInputWidth=0
 SignalExport.syncOutput<0010>=wready
-SignalExport.syncOutput<0009>=getchar7
-SignalExport.syncOutput<0008>=getchar6
-SignalExport.syncOutput<0007>=getchar5
-SignalExport.syncOutput<0006>=getchar4
-SignalExport.syncOutput<0005>=getchar3
-SignalExport.syncOutput<0004>=getchar2
-SignalExport.syncOutput<0003>=getchar1
-SignalExport.syncOutput<0002>=getchar0
+SignalExport.syncOutput<0009>=getchar[7]
+SignalExport.syncOutput<0008>=getchar[6]
+SignalExport.syncOutput<0007>=getchar[5]
+SignalExport.syncOutput<0006>=getchar[4]
+SignalExport.syncOutput<0005>=getchar[3]
+SignalExport.syncOutput<0004>=getchar[2]
+SignalExport.syncOutput<0003>=getchar[1]
+SignalExport.syncOutput<0002>=getchar[0]
 SignalExport.syncOutput<0001>=cmd0
 SignalExport.syncOutput<0000>=rvalid
 SignalExport.syncOutputWidth=11

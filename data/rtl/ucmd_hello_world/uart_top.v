@@ -1,4 +1,4 @@
-// Модуль верхнего уровня проекта uart_top.v
+//     uart_top.v
 module uart_top
 #(parameter frequency=66000000, parameter baudrate=115200, parameter data_width=8) (
   input  clk,
@@ -42,32 +42,18 @@ assign rready = (echo)? wready: rready_ucmd;
 
 
 // Instantiate the module
-top_ucmd_fsm_hello #(.fpga_type("virtex")) hello_world (
+top_ucmd_fsm_uart_hello_world #(.fpga_type("virtex")) uart_hello_world (
     .rst(rst), 
     .clk(clk), 
     .debug(), 
     .rvalid(rvalid), 
     .cmd0(0), 
     .wready(wready), 
-    .getchar7(rdata[7]), 
-    .getchar6(rdata[6]), 
-    .getchar5(rdata[5]), 
-    .getchar4(rdata[4]), 
-    .getchar3(rdata[3]), 
-    .getchar2(rdata[2]), 
-    .getchar1(rdata[1]), 
-    .getchar0(rdata[0]), 
+    .getchar(rdata), 
     .wvalid(wvalid_ucmd), 
     .rready(rready_ucmd), 
-    .putchar7(wdata_ucmd[7]), 
-    .putchar6(wdata_ucmd[6]), 
-    .putchar5(wdata_ucmd[5]), 
-    .putchar4(wdata_ucmd[4]), 
-    .putchar3(wdata_ucmd[3]), 
-    .putchar2(wdata_ucmd[2]), 
-    .putchar1(wdata_ucmd[1]), 
-    .putchar0(wdata_ucmd[0]), 
-	 .echo(echo),
+    .putchar(wdata_ucmd), 
+	  .echo(echo),
     .ucmdRAM_data(0), 
     .ucmdRAM_adr(0), 
     .ucmdRAM_we(1'b0), 
